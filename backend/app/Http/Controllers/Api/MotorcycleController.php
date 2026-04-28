@@ -63,13 +63,7 @@ class MotorcycleController extends Controller
     public function update(Request $request, string $id)
     {
         $motor = Motorcycle::where('user_id', auth()->id())
-                           ->where('id', $id)
-                           ->first();
-        if (!$motor) {
-            return response()->json([
-                'message' => 'Data tidak ditemukan',
-            ],404);
-        }
+                           ->findOrFail($id);
 
         $request->validate([
             'motorcycle_name' => 'required|string|max:255',
@@ -83,9 +77,11 @@ class MotorcycleController extends Controller
             'current_km' => $request->current_km
         ]);
 
+        $motor->refresh();
+
         return (new MotorcycleResource($motor))->additional([
             'success' => true,
-            'message' => 'Motor berhasil ditambahkan'
+            'message' => 'Motor berhasil diperbarui'
         ]);
     }
 
