@@ -23,10 +23,10 @@ class TripObserver
      */
     public function updated(Trip $trip): void
     {
-        if ($trip->wasChange('distance_km')){
+        if ($trip->wasChanged('distance_km')){
             $motor = $trip->motorcycle;
 
-            $difference = $trip->distance_km - $motor->current_km;
+            $difference = $trip->distance_km - $trip->getOriginal('distance_km');
 
             $motor->current_km += $difference;
             $motor->save();

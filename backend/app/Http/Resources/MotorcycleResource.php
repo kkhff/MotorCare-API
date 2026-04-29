@@ -16,10 +16,11 @@ class MotorcycleResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
+            'id' => $this->id,
             'name' => $this->user->name,
             'motorcycle_name' => $this->motorcycle_name,
             'brand' => $this->brand,
-            'curremt_km' => $this->current_km,
+            'current_km' => $this->current_km,
             'parts' => MaintenancePartResource::collection($this->whenLoaded('maintenance')),
         ];
     }

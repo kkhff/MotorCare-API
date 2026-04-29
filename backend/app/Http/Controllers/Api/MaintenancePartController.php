@@ -13,9 +13,18 @@ class MaintenancePartController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $request->validate([
+            'motorcycle_id' => 'required|integer',
+        ]);
+
+        $motor = Motorcycle::where('user_id', auth()->id())
+                           ->findOrFail($request->motorcycle_id);
+
+        $parts = $motor->maintenance();
+
+        return MaintenancePartResource::collection($parts->latest()->paginate(10));
     }
 
     /**
@@ -23,9 +32,6 @@ class MaintenancePartController extends Controller
      */
     public function store(Request $request)
     {
-        $motor = Motorcycle::where('user_id', auth()->id())
-                           ->findOrFail($request->motorcycle_id);
-
         $request->validate([
             'motorcycle_id' => 'required|integer',
             'part_name' => 'required|string',
@@ -33,8 +39,13 @@ class MaintenancePartController extends Controller
             'last_replace_km' => 'required|numeric',
         ]);
 
+        $motor = Motorcycle::where('user_id', auth()->id())
+                           ->findOrFail($request->motorcycle_id);
+
+
+
         $part = MaintenancePart::create([
-            'motorcycle_id' => $request->motorcycle_id,
+            'motorcycle_id' => $motor->id,
             'part_name' => $request->part_name,
             'interval_km' => $request->interval_km,
             'last_replace_km' => $request->last_replace_km,
@@ -51,7 +62,17 @@ class MaintenancePartController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $part = MaintenancePart::findOrFail($id);
+
+        $user = $part->motorcycle->user_id;
+
+        if ($user !== auth()->id()){
+            return response()->json([
+                'message' => 'Komponen tidak dapat ditemukan'
+            ], 404);
+        }
+
+        return (new MaintenancePartResource($part));
     }
 
     /**
@@ -65,7 +86,7 @@ class MaintenancePartController extends Controller
 
         if ($user !== auth()->id()){
             return response()->json([
-                'messagge' => 'Komponen tidak dapat ditemukan'
+                'message' => 'Komponen tidak dapat ditemukan'
             ], 404);
         }
 
@@ -97,7 +118,7 @@ class MaintenancePartController extends Controller
 
         if ($user !== auth()->id()){
             return response()->json([
-                'messagge' => 'Komponen tidak dapat ditemukan'
+                'message' => 'Komponen tidak dapat ditemukan'
             ], 404);
         }
         $part->delete();
@@ -115,7 +136,7 @@ class MaintenancePartController extends Controller
 
         if ($user !== auth()->id()){
             return response()->json([
-                'messagge' => 'Komponen tidak dapat ditemukan'
+                'message' => 'Komponen tidak dapat ditemukan'
             ], 404);
         }
         $current_km = $part->motorcycle->current_km;

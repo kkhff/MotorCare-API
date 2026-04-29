@@ -19,6 +19,8 @@ class MaintenancePartResource extends JsonResource
         $remainingKm = $nextReplaceAt - $currentKm;
 
         return [
+            'id' => $this->id,
+            'motorcycle_name' => $this->motorcycle->motorcycle_name,
             'part_name' => $this->part_name,
             'interval_km' => $this->interval_km,
             'last_replace_km' => $this->last_replace_km,
